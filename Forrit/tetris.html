@@ -1,0 +1,79 @@
+<html>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+  <script id="vertex-shader" type="x-shader/x-vertex">
+    attribute  vec4 vPosition;
+    uniform mat4 projection;
+    uniform mat4 modelview;
+    void main()
+    {
+        gl_Position = projection * modelview * vPosition;
+    }
+  </script>
+
+  <script id="fragment-shader" type="x-shader/x-fragment">
+    precision mediump float;
+    uniform vec4 fColor;
+    void
+    main()
+    {
+        gl_FragColor = fColor;
+    }
+  </script>
+
+  <script type="text/javascript" src="../COMMON/webgl-utils.js"></script>
+  <script type="text/javascript" src="../COMMON/initShaders.js"></script>
+  <script type="text/javascript" src="../COMMON/MV.js"></script>
+  <script type="text/javascript" src="vertices.js"></script>
+  <script type="text/javascript" src="tetris.js"></script>
+
+  <body id="body">
+    <div class="content">
+      <h1 class="trisis_Heading">
+        <span>TETRIS</span>
+      </h1>
+      <canvas id="gl-canvas" width="800" height="800" tabindex="1">
+        Oops ... your browser doesn't support the HTML5 canvas element
+      </canvas>
+      <div class="score_wrapper">
+        <div class="score">
+          <p>Score:</p>
+          <p id="currScore" class="currScore">0</p>
+        </div>
+      </div>
+      
+    <div class="controls">
+      <h3>Controls</h3>
+      <div>
+          <p>Enter  </p><p> start game</p>
+      </div> 
+      <div>
+          <p>Arrows </p><p> move block</p>
+      </div> 
+      <div>
+          <p>Space  </p><p> drop faster</p>
+      </div> 
+      <div>
+          <p>A/Z    </p><p> rotate over X-axis</p>
+      </div> 
+      <div>
+          <p>S/X    </p><p> rotate over Y-axis</p>
+      </div> 
+      <div>
+          <p>D/C    </p><p> rotate over Z-axis</p>
+      </div> 
+      <div>
+          <p>P      </p><p> pause game</p>
+      </div> 
+      <div>
+          <p>Mouse  </p><p> rotate the qube</p>
+      </div> 
+      <div>
+          <p>Scroll </p><p> zoom in/out </p>
+      </div> 
+    </div>
+    
+  </div>
+
+  </body>
+</html>
