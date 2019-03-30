@@ -186,48 +186,6 @@ function blockMovement(b) {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * Hér fyrir neðan er virkni leiksins
  * hefja leik
@@ -257,6 +215,10 @@ function setOfNextBlock() {
   return currBlock;
 }
 
+/**
+ * Virkni a space takkann
+ * Droppar niður kubb sem er í leik.
+ */
 function dropDown(b) {
   if (keys[32]) { t = moveBlock(b, 'y', -1); }     // Space
   if (dropTimer) { 
@@ -266,22 +228,27 @@ function dropDown(b) {
   return b;
 }
 
+/**
+ * Nýr kubbur
+ * ATH þarf aðeins að skoða
+ * beini kubburinn er góður, hinn ekki alveg
+ */
 function newBlock() {
-  var center, other, third;
+  var center, one, three;
   var randX = Math.floor(Math.random() * 2) + 2;
   var randZ = Math.floor(Math.random() * 2) + 2;
   var color = Math.floor(Math.random() * 3) + 1;
   if (Math.random() < 0.5) {
     center = {x: randX, y: 21, z: randZ};
-    other = {x: randX, y: 22, z: randZ};
-    third = {x: randX, y: 20, z: randZ};
+    one = {x: randX, y: 22, z: randZ};
+    three = {x: randX, y: 20, z: randZ};
   } else {
     center = {x: randX, y: 20, z: randZ};
-    other = {x: randX, y: 21, z: randZ};
-    third = {x: randX + 1, y: 20, z: randZ};
+    one = {x: randX, y: 21, z: randZ};
+    three = {x: randX + 1, y: 20, z: randZ};
   }
 
-  var Block = {center, other, third, color};
+  var Block = {center, one, three, color};
 
   if (Math.random() > 0.5) {
     rotateBlock(Block, ['x', 'y']);
@@ -298,8 +265,8 @@ function newBlock() {
 
 function moveBlock(b, axis, num) {
   b.center[axis] += num;
-  b.other[axis] += num;
-  b.third[axis] += num;
+  b.one[axis] += num;
+  b.three[axis] += num;
   return b;
 }
 
@@ -322,30 +289,30 @@ function blockAllocationForRotation(C, B, extra) {
 }
 
 function rotateBlock(b, extra) {
-  blockAllocationForRotation(b.center, b.other, extra);
-  blockAllocationForRotation(b.center, b.third, extra);
+  blockAllocationForRotation(b.center, b.one, extra);
+  blockAllocationForRotation(b.center, b.three, extra);
 }
 
 function sidesCollide(b) {
   if (  (b.center.x > 5 || b.center.x < 0 )||(b.center.z > 5 || b.center.z < 0) ||
-        (b.other.x > 5 || b.other.x < 0) ||(b.other.z > 5 || b.other.z < 0) ||
-        (b.third.x > 5 || b.third.x < 0) ||(b.third.z > 5 || b.third.z < 0) ) {
+        (b.one.x > 5 || b.one.x < 0) ||(b.one.z > 5 || b.one.z < 0) ||
+        (b.three.x > 5 || b.three.x < 0) ||(b.three.z > 5 || b.three.z < 0) ) {
     return true;
   }
-  if (b.center.y < 20 && b.other.y < 20 && b.third.y < 20) {
+  if (b.center.y < 20 && b.one.y < 20 && b.three.y < 20) {
     if (grid[b.center.y][b.center.x][b.center.z] !== 0) { return true; }
-    if (grid[b.other.y][b.other.x][b.other.z] !== 0) { return true;}
-    if (grid[b.third.y][b.third.x][b.third.z] !== 0) { return true;}
+    if (grid[b.one.y][b.one.x][b.one.z] !== 0) { return true;}
+    if (grid[b.three.y][b.three.x][b.three.z] !== 0) { return true;}
   }
   return false;
 }
 
 function downCollide(b) {
-    if (b.center.y < 0 || b.other.y < 0 || b.third.y < 0) { return true; }
-    if (b.center.y < 20 && b.other.y < 20 && b.third.y < 20) {
+    if (b.center.y < 0 || b.one.y < 0 || b.three.y < 0) { return true; }
+    if (b.center.y < 20 && b.one.y < 20 && b.three.y < 20) {
         if (grid[b.center.y][b.center.x][b.center.z] !== 0) { return true; }
-        if (grid[b.other.y][b.other.x][b.other.z] !== 0) { return true;}
-        if (grid[b.third.y][b.third.x][b.third.z] !== 0) { return true;}
+        if (grid[b.one.y][b.one.x][b.one.z] !== 0) { return true;}
+        if (grid[b.three.y][b.three.x][b.three.z] !== 0) { return true;}
     }
     return false;
 }
@@ -371,14 +338,14 @@ function updateBlock(curr) {
    * toppinn á boxinu okkar
    */
   if (downCollide(next)) {
-    if (curr.center.y > 19 || curr.other.y > 19 || curr.third.y > 19) {
+    if (curr.center.y > 19 || curr.one.y > 19 || curr.three.y > 19) {
       window.alert('Game over \n'+'Final score: '+ document.getElementById("currScore").innerHTML);
       reset();
     }
     else {
       grid[curr.center.y][curr.center.x][curr.center.z] = curr.color;
-      grid[curr.other.y][curr.other.x][curr.other.z] = curr.color;
-      grid[curr.third.y][curr.third.x][curr.third.z] = curr.color;
+      grid[curr.one.y][curr.one.x][curr.one.z] = curr.color;
+      grid[curr.three.y][curr.three.x][curr.three.z] = curr.color;
     }
       
     checkForFullPlane();
@@ -387,7 +354,10 @@ function updateBlock(curr) {
   return next;
 }
 
-
+/**
+ * Hérna athugum við hvort það hefur verið fyllt í heila línu.
+ * Ef svo er þá látum við hana hverfa og leikmaður fær stig
+ */
 function checkForFullPlane() {
   var completed = [];
   grid.forEach((plane, y) => {
@@ -443,8 +413,8 @@ function render() {
 
   if (started) {
     drawBox(mv, currBlock.center, colors[currBlock.color]);
-    drawBox(mv, currBlock.other, colors[currBlock.color]);
-    drawBox(mv, currBlock.third, colors[currBlock.color]);
+    drawBox(mv, currBlock.one, colors[currBlock.color]);
+    drawBox(mv, currBlock.three, colors[currBlock.color]);
   }
 
   grid.forEach((_, y) =>
