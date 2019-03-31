@@ -20,7 +20,6 @@ var colorLoc;
 var Numfill = points.boxFill.length;
 var Numframe = points.boxFrame.length;
 
-// The points in 3d space -- in vertices file
 var vertices = points.boxFill.concat(points.boxFrame);
 
 var keys = {};
@@ -32,7 +31,7 @@ var isPaused = true;
 var started = false;
 var dropspeed = 1000;
 
-var grid = Array.from(Array(20), _ => Array.from(Array(6), _ => Array(6).fill(0))); // [20[6[6]]] -- [y[z[x]]]
+var grid = Array.from(Array(20), _ => Array.from(Array(6), _ => Array(6).fill(0)));
 
 
 var colors = [
@@ -173,7 +172,7 @@ function blockMovement(b) {
   if (keys[38]) { moveBlock(b, 'z', -1); }
   if (keys[39]) { moveBlock(b, 'x', 1); }
   if (keys[40]) { moveBlock(b, 'z', 1); }
-  
+
 // blockRotation
   if (keys[65]) { rotateBlock(b, ['y','z']); }
   if (keys[90]) { rotateBlock(b, ['z','y']); }
@@ -221,7 +220,7 @@ function setOfNextBlock() {
  */
 function dropDown(b) {
   if (keys[32]) { t = moveBlock(b, 'y', -1); }     // Space
-  if (dropTimer) { 
+  if (dropTimer) {
     b = moveBlock(b, 'y', -1);
     dropTimer = false;
   }
@@ -334,7 +333,7 @@ function updateBlock(curr) {
 
   /**
    * Þetta checkar hvort við erum búin að tapa leiknum.
-   * Ef curr. breyturnar verða stærri en 19 þýðir það að við erum komin í 
+   * Ef curr. breyturnar verða stærri en 19 þýðir það að við erum komin í
    * toppinn á boxinu okkar
    */
   if (downCollide(next)) {
@@ -347,7 +346,7 @@ function updateBlock(curr) {
       grid[curr.one.y][curr.one.x][curr.one.z] = curr.color;
       grid[curr.three.y][curr.three.x][curr.three.z] = curr.color;
     }
-      
+
     checkForFullPlane();
     next = setOfNextBlock();
   }
@@ -423,11 +422,10 @@ function render() {
   );
   mv = mult(mv, rotateX(spinX));
   mv = mult(mv, rotateY(spinY));
-  gl.cullFace(gl.FRONT); // outside
+  gl.cullFace(gl.FRONT);
 
   mv = mult(mv, scalem(boxSize / 10, boxSize / 10, boxSize / 10));
 
-  // update the postitions
   if (!isPaused) {
     currBlock = updateBlock(currBlock);
   }
@@ -466,9 +464,6 @@ function render() {
   gl.uniform4fv(colorLoc, vec4(0.1, 0.1, 0.1, 0.001));
   gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
   gl.drawArrays(gl.TRIANGLES, 0, Numfill);
-
-  // Reverse
-  // mv = mult(mv, scalem(1 / boxSize, 1 / boxSize, 1 / boxSize));
 
   requestAnimFrame(render);
 }
