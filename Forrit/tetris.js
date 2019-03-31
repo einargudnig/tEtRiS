@@ -354,6 +354,26 @@ function updateBlock(curr) {
   return next;
 }
 
+function deleteFullRow(levels) {
+  var colTime = 200;
+  var c = 0;
+  var intervalID = setInterval(function() {
+    levels.forEach(y =>
+      grid[y].forEach((_, x) => _.forEach((_, z) => (grid[y][x][z] = c)))
+    );
+    if (++c === 7) {
+      window.clearInterval(intervalID);
+    }
+  }, colTime);
+  setTimeout(() => {
+    for (var i = levels.length - 1; i >= 0; i--) {
+      grid.splice(levels[i], 1);
+      grid.push(Array.from(Array(6), _ => Array(6).fill(0)));
+    }
+    // Bomb ??
+  }, 7 * colTime);
+}
+
 /**
  * Hérna athugum við hvort það hefur verið fyllt í heila línu.
  * Ef svo er þá látum við hana hverfa og leikmaður fær stig
@@ -367,6 +387,7 @@ function checkForFullPlane() {
   });
 
   if (completed.length > 0) {
+    deleteFullRow(completed);
     addScore(completed.length);
   }
 }
