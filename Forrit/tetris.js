@@ -10,15 +10,15 @@ var origY;
 
 var boxSize = 6;
 
-var zView = boxSize * 3; // viewer z position
+var zView = boxSize * 3;
 
 var proLoc;
 var mvLoc;
 var colorLoc;
 
 // Number of points for each object
-var Numfill = points.boxFill.length;
-var Numframe = points.boxFrame.length;
+var numFill = points.boxFill.length;
+var numFrame = points.boxFrame.length;
 
 var vertices = points.boxFill.concat(points.boxFrame);
 
@@ -76,9 +76,8 @@ window.onload = function init() {
   proLoc = gl.getUniformLocation(program, 'projection');
   mvLoc = gl.getUniformLocation(program, 'modelview');
 
-  // Projection array for viewer
-  var proj = perspective(90.0, 1.0, 0.1, 100.0);
-  gl.uniformMatrix4fv(proLoc, false, flatten(proj));
+  var view = perspective(90.0, 1.0, 0.1, 100.0);
+  gl.uniformMatrix4fv(proLoc, false, flatten(view));
 
   // Create first element
   nextBlock = newBlock();
@@ -88,7 +87,6 @@ window.onload = function init() {
     movement = true;
     origX = e.offsetX;
     origY = e.offsetY;
-    //e.preventDefault(); // Disable drag and drop
   });
 
   canvas.addEventListener('touchstart', function(e) {
@@ -124,16 +122,16 @@ window.onload = function init() {
     }
   });
 
-  // Keyboard functions
+  // Stýringar
   window.addEventListener('keydown', function(e) {
     e = e || event;
     keys[e.keyCode] = e.type == 'keydown';
     if (keys[13] && !started) {
       startGame();
-    } // Enter - start game
+    }
     if (keys[80]) {
       isPaused = !isPaused;
-    } // p Key - toggle pause
+    }
     if (document.activeElement === canvas){
       e.preventDefault();
     }
@@ -144,7 +142,7 @@ window.onload = function init() {
     keys[e.keyCode] = e.type == 'keydown';
   });
 
-  // Scroll wheel handler
+
   window.addEventListener('mousewheel', function(e) {
     if (document.activeElement === canvas){
       if (e.wheelDelta > 0.0) {
@@ -173,7 +171,6 @@ function blockMovement(b) {
   if (keys[39]) { moveBlock(b, 'x', 1); }
   if (keys[40]) { moveBlock(b, 'z', 1); }
 
-// blockRotation
   if (keys[65]) { rotateBlock(b, ['y','z']); }
   if (keys[90]) { rotateBlock(b, ['z','y']); }
   if (keys[83]) { rotateBlock(b, ['x','z']); }
@@ -205,7 +202,7 @@ function reset() {
   isPaused=true;
   started=false;
   document.getElementById("currScore").innerHTML = 0;
-  grid = Array.from(Array(20), _ => Array.from(Array(6), _ => Array(6).fill(0))); // [20[6[6]]] -- [y[z[x]]]
+  grid = Array.from(Array(20), _ => Array.from(Array(6), _ => Array(6).fill(0)));
 }
 
 function setOfNextBlock() {
@@ -233,21 +230,21 @@ function dropDown(b) {
  * beini kubburinn er góður, hinn ekki alveg
  */
 function newBlock() {
-  var center, one, three;
+  var center, one, two;
   var randX = Math.floor(Math.random() * 2) + 2;
   var randZ = Math.floor(Math.random() * 2) + 2;
   var color = Math.floor(Math.random() * 3) + 1;
   if (Math.random() < 0.5) {
     center = {x: randX, y: 21, z: randZ};
     one = {x: randX, y: 22, z: randZ};
-    three = {x: randX, y: 20, z: randZ};
+    two = {x: randX, y: 20, z: randZ};
   } else {
     center = {x: randX, y: 20, z: randZ};
     one = {x: randX, y: 21, z: randZ};
-    three = {x: randX + 1, y: 20, z: randZ};
+    two = {x: randX + 1, y: 20, z: randZ};
   }
 
-  var Block = {center, one, three, color};
+  var Block = {center, one, two, color};
 
   if (Math.random() > 0.5) {
     rotateBlock(Block, ['x', 'y']);
@@ -265,7 +262,7 @@ function newBlock() {
 function moveBlock(b, axis, num) {
   b.center[axis] += num;
   b.one[axis] += num;
-  b.three[axis] += num;
+  b.two[axis] += num;
   return b;
 }
 
@@ -289,29 +286,29 @@ function blockAllocationForRotation(C, B, extra) {
 
 function rotateBlock(b, extra) {
   blockAllocationForRotation(b.center, b.one, extra);
-  blockAllocationForRotation(b.center, b.three, extra);
+  blockAllocationForRotation(b.center, b.two, extra);
 }
 
 function sidesCollide(b) {
   if (  (b.center.x > 5 || b.center.x < 0 )||(b.center.z > 5 || b.center.z < 0) ||
         (b.one.x > 5 || b.one.x < 0) ||(b.one.z > 5 || b.one.z < 0) ||
-        (b.three.x > 5 || b.three.x < 0) ||(b.three.z > 5 || b.three.z < 0) ) {
+        (b.two.x > 5 || b.two.x < 0) ||(b.two.z > 5 || b.two.z < 0) ) {
     return true;
   }
-  if (b.center.y < 20 && b.one.y < 20 && b.three.y < 20) {
+  if (b.center.y < 20 && b.one.y < 20 && b.two.y < 20) {
     if (grid[b.center.y][b.center.x][b.center.z] !== 0) { return true; }
     if (grid[b.one.y][b.one.x][b.one.z] !== 0) { return true;}
-    if (grid[b.three.y][b.three.x][b.three.z] !== 0) { return true;}
+    if (grid[b.two.y][b.two.x][b.two.z] !== 0) { return true;}
   }
   return false;
 }
 
 function downCollide(b) {
-    if (b.center.y < 0 || b.one.y < 0 || b.three.y < 0) { return true; }
-    if (b.center.y < 20 && b.one.y < 20 && b.three.y < 20) {
+    if (b.center.y < 0 || b.one.y < 0 || b.two.y < 0) { return true; }
+    if (b.center.y < 20 && b.one.y < 20 && b.two.y < 20) {
         if (grid[b.center.y][b.center.x][b.center.z] !== 0) { return true; }
         if (grid[b.one.y][b.one.x][b.one.z] !== 0) { return true;}
-        if (grid[b.three.y][b.three.x][b.three.z] !== 0) { return true;}
+        if (grid[b.two.y][b.two.x][b.two.z] !== 0) { return true;}
     }
     return false;
 }
@@ -337,30 +334,34 @@ function updateBlock(curr) {
    * toppinn á boxinu okkar
    */
   if (downCollide(next)) {
-    if (curr.center.y > 19 || curr.one.y > 19 || curr.three.y > 19) {
+    if (curr.center.y > 19 || curr.one.y > 19 || curr.two.y > 19) {
       window.alert('Game over \n'+'Final score: '+ document.getElementById("currScore").innerHTML);
       reset();
     }
     else {
       grid[curr.center.y][curr.center.x][curr.center.z] = curr.color;
       grid[curr.one.y][curr.one.x][curr.one.z] = curr.color;
-      grid[curr.three.y][curr.three.x][curr.three.z] = curr.color;
+      grid[curr.two.y][curr.two.x][curr.two.z] = curr.color;
     }
 
-    checkForFullPlane();
+    isFullPlane();
     next = setOfNextBlock();
   }
   return next;
 }
 
-function deleteFullRow(levels) {
+/**
+ * Hér er eytt heillri línu/hæð ef fyllt hefur verið í hana
+ * Þá kemur skemmtilegt effect og línan er fjarlægð
+ */
+function deleteRow(levels) {
   var colTime = 200;
-  var c = 0;
+  var x = 0;
   var intervalID = setInterval(function() {
     levels.forEach(y =>
-      grid[y].forEach((_, x) => _.forEach((_, z) => (grid[y][x][z] = c)))
+      grid[y].forEach((_, x) => _.forEach((_, z) => (grid[y][x][z] = x)))
     );
-    if (++c === 7) {
+    if (++x === 7) {
       window.clearInterval(intervalID);
     }
   }, colTime);
@@ -369,15 +370,15 @@ function deleteFullRow(levels) {
       grid.splice(levels[i], 1);
       grid.push(Array.from(Array(6), _ => Array(6).fill(0)));
     }
-    // Bomb ??
   }, 7 * colTime);
 }
 
 /**
  * Hérna athugum við hvort það hefur verið fyllt í heila línu.
- * Ef svo er þá látum við hana hverfa og leikmaður fær stig
+ * Ef svo er þá látum við hana hverfa með kalli í isFullPlane()
+ * og leikmaður fær stig
  */
-function checkForFullPlane() {
+function isFullPlane() {
   var completed = [];
   grid.forEach((plane, y) => {
     if (plane.every(_ => _.every(curr => curr !== 0))) {
@@ -386,7 +387,7 @@ function checkForFullPlane() {
   });
 
   if (completed.length > 0) {
-    deleteFullRow(completed);
+    deleteRow(completed);
     addScore(completed.length);
   }
 }
@@ -398,18 +399,16 @@ function addScore(planes) {
 
 function drawFrame(mv, pos) {
   mv = mult(mv, translate(pos.x * 2 - 5, pos.y * 2 - 19, pos.z * 2 - 5));
-  // white frame arond the block
   gl.uniform4fv(colorLoc, vec4(0.5, 0.5, 0.5, 1.0));
   gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
-  gl.drawArrays(gl.LINE_STRIP, Numfill, Numframe);
+  gl.drawArrays(gl.LINE_STRIP, numFill, numFrame);
 }
 
 function drawBox(mv, pos, color) {
   mv = mult(mv, translate(pos.x * 2 - 5, pos.y * 2 - 19, pos.z * 2 - 5));
-  // Half transparent glass container, only draw inside
   gl.uniform4fv(colorLoc, color);
   gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
-  gl.drawArrays(gl.TRIANGLES, 0, Numfill);
+  gl.drawArrays(gl.TRIANGLES, 0, numFill);
 }
 
 function render() {
@@ -433,7 +432,7 @@ function render() {
   if (started) {
     drawBox(mv, currBlock.center, colors[currBlock.color]);
     drawBox(mv, currBlock.one, colors[currBlock.color]);
-    drawBox(mv, currBlock.three, colors[currBlock.color]);
+    drawBox(mv, currBlock.two, colors[currBlock.color]);
   }
 
   grid.forEach((_, y) =>
@@ -453,17 +452,15 @@ function render() {
     scalem(boxSize * 0.6 + 0.1, boxSize * 2 + 0.1, boxSize * 0.6 + 0.1)
   );
 
-  gl.cullFace(gl.FRONT); // Inside
+  gl.cullFace(gl.FRONT);
 
-  //  Draw the platform
   gl.uniform4fv(colorLoc, vec4(1.0, 1.0, 1.0, 1.0));
   gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
-  gl.drawArrays(gl.LINE_STRIP, Numfill, Numframe);
+  gl.drawArrays(gl.LINE_STRIP, numFill, numFrame);
 
-  // Half transparent glass container, only draw inside
   gl.uniform4fv(colorLoc, vec4(0.1, 0.1, 0.1, 0.001));
   gl.uniformMatrix4fv(mvLoc, false, flatten(mv));
-  gl.drawArrays(gl.TRIANGLES, 0, Numfill);
+  gl.drawArrays(gl.TRIANGLES, 0, numFill);
 
   requestAnimFrame(render);
 }
